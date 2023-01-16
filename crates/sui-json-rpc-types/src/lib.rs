@@ -1814,9 +1814,9 @@ impl TryFrom<CertifiedTransaction> for SuiCertifiedTransaction {
         let digest = *cert.digest();
         let (data, sig) = cert.into_data_and_sig();
         // We should always have a signature here.
-        if sig.signature.sig.is_none() {
-            return Err(anyhow::anyhow!("Certified transaction is not signed"));
-        }
+        // if sig.signature.sig.is_none() {
+        //     return Err(anyhow::anyhow!("Certified transaction is not signed"));
+        // }
         Ok(Self {
             transaction_digest: digest,
             data: data.intent_message.value.try_into()?,
@@ -1895,6 +1895,9 @@ impl SuiFinalizedEffects {
     ) -> Result<Self, anyhow::Error> {
         let digest = effects.effects.digest();
         // We should always have a signature here.
+        // if auth_sign_info.signature.sig.is_none() {
+        //     return Err(anyhow::anyhow!("No quorum signature."));
+        // }
         Ok(Self {
             transaction_effects_digest: digest,
             effects: SuiTransactionEffects::try_from(effects.effects, resolver)?,
