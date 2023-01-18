@@ -22,6 +22,7 @@ export const Default: StoryObj<ObjectDetailsProps> = {
         <ObjectDetails
             name="Rare Apepé 4042"
             type="JPEG Image"
+            id="0x4897c931565428a2a3842afb523ca5559d4b6726"
             image="https://ipfs.io/ipfs/bafkreibngqhl3gaa7daob4i2vccziay2jjlp435cf66vhono7nrvww53ty"
         />
     ),
