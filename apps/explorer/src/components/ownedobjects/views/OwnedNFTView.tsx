@@ -2,33 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { trimStdLibPrefix } from '../../../utils/stringUtils';
-import DisplayBox from '../../displaybox/DisplayBox';
 import { type DataType } from '../OwnedObjectConstants';
 
-import styles from '../styles/OwnedObjects.module.css';
-
-import { ObjectLink } from '~/ui/InternalLink';
+import { ObjectDetails } from '~/ui/ObjectDetails';
 
 export default function OwnedNFTView({ results }: { results: DataType }) {
     return (
-        <div id="ownedObjects" className={styles.ownedobjects}>
-            {results.map((entryObj, index1) => (
-                <div className={styles.objectbox} key={`object-${index1}`}>
-                    <div className={styles.previewimage}>
-                        <DisplayBox display={entryObj.display} />
-                    </div>
-                    <div className={styles.textitem}>
-                        {entryObj.name && (
-                            <div className={styles.name}>{entryObj.name}</div>
-                        )}
-                        <div>
-                            <ObjectLink objectId={entryObj.id} />
-                        </div>
-                        <div className={styles.typevalue}>
-                            {trimStdLibPrefix(entryObj.Type)}
-                        </div>
-                    </div>
-                </div>
+        <div data-testid="owned-objects">
+            {results.map((entryObj, idx) => (
+                <ObjectDetails
+                    key={`${entryObj.name}-${idx}`}
+                    name={entryObj.name}
+                    image={entryObj.display}
+                    type={trimStdLibPrefix(entryObj.Type)}
+                />
             ))}
         </div>
     );

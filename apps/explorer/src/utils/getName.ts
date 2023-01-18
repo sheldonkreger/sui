@@ -4,6 +4,8 @@
 import { Base64DataBuffer } from '@mysten/sui.js';
 
 // TODO : Import from  SDK
+import { Base64DataBuffer } from '@mysten/sui.js';
+
 import { VALDIATOR_NAME } from '~/pages/validator/ValidatorDataTypes';
 
 const textDecoder = new TextDecoder();
