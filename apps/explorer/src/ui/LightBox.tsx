@@ -28,7 +28,6 @@ export function LightBox({ open, onClose, children }: LightBoxProps) {
                         aria-hidden="true"
                     />
                 </Transition.Child>
-
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"

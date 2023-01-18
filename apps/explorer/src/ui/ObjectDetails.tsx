@@ -1,9 +1,10 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
+import clsx from 'clsx';
 import { useState } from 'react';
 
 import { ObjectLink } from './InternalLink';
-import { LightBox } from './LightBox';
+import { ObjectPreview } from './ObjectPreview';
 
 export interface ObjectDetailsProps {
     image?: string;
@@ -11,8 +12,27 @@ export interface ObjectDetailsProps {
     type: string;
 }
 
+interface ImageProps {
+    onClick: () => void;
+    className: string;
+    src: string;
+    alt?: string;
+}
+
+const Image = ({ onClick, className, alt, src, ...rest }: ImageProps) => (
+    <img
+        alt={alt}
+        src={src}
+        onClick={onClick}
+        className={clsx('rounded-md', 'cursor-pointer', className)}
+        {...rest}
+    />
+);
+
 export function ObjectDetails({ image, name, type }: ObjectDetailsProps) {
     const [open, setOpen] = useState(false);
+    const close = () => setOpen(false);
+    const openPreview = () => setOpen(true);
 
     return (
         <div
@@ -21,21 +41,19 @@ export function ObjectDetails({ image, name, type }: ObjectDetailsProps) {
         >
             {image && (
                 <>
-                    <LightBox open={open} onClose={() => setOpen(false)}>
-                        <img
-                            onClick={() => setOpen(true)}
-                            alt="test"
-                            className="max-h-[80vh] max-w-[80vw] rounded-md"
-                            data-testid="loadedImage"
+                    <ObjectPreview open={open} onClose={close}>
+                        <Image
+                            onClick={close}
+                            alt={name}
                             src={image}
+                            className="max-h-[80vh] max-w-[80vw]"
                         />
-                    </LightBox>
-                    <img
-                        onClick={() => setOpen(true)}
-                        alt="test"
-                        className="h-[60px] w-[60px] cursor-pointer rounded-md object-cover"
-                        data-testid="loadedImage"
+                    </ObjectPreview>
+                    <Image
+                        onClick={openPreview}
+                        alt={name}
                         src={image}
+                        className="h-[60px] w-[60px] object-cover"
                     />
                 </>
             )}
