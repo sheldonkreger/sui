@@ -7,6 +7,7 @@ import { ObjectLink } from './InternalLink';
 import { ObjectPreview } from './ObjectPreview';
 
 export interface ObjectDetailsProps {
+    id: string;
     image?: string;
     name?: string;
     type: string;
@@ -19,17 +20,19 @@ interface ImageProps {
     alt?: string;
 }
 
-const Image = ({ onClick, className, alt, src, ...rest }: ImageProps) => (
-    <img
-        alt={alt}
-        src={src}
-        onClick={onClick}
-        className={clsx('rounded-md', 'cursor-pointer', className)}
-        {...rest}
-    />
-);
+function Image({ onClick, className, alt, src, ...rest }: ImageProps) {
+    return (
+        <img
+            alt={alt}
+            src={src}
+            onClick={onClick}
+            className={clsx('rounded-md', 'cursor-pointer', className)}
+            {...rest}
+        />
+    );
+}
 
-export function ObjectDetails({ image, name, type }: ObjectDetailsProps) {
+export function ObjectDetails({ id, image, name, type }: ObjectDetailsProps) {
     const [open, setOpen] = useState(false);
     const close = () => setOpen(false);
     const openPreview = () => setOpen(true);
@@ -59,7 +62,7 @@ export function ObjectDetails({ image, name, type }: ObjectDetailsProps) {
             )}
             <div className="flex flex-col gap-1.25">
                 <span className="text-p2 text-gray-90">{name}</span>
-                <ObjectLink objectId="0xe169bdf2ef33434ceccd141691c7c66ff3ed4489" />
+                <ObjectLink objectId={id} />
                 <span className="text-steel-dark">{type}</span>
             </div>
         </div>

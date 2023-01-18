@@ -11,6 +11,7 @@ export default function OwnedNFTView({ results }: { results: DataType }) {
         <div data-testid="owned-objects">
             {results.map((entryObj, idx) => (
                 <ObjectDetails
+                    id={entryObj.id}
                     key={`${entryObj.name}-${idx}`}
                     name={entryObj.name}
                     image={entryObj.display}
