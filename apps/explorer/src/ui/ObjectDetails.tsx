@@ -2,9 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 import clsx from 'clsx';
 import { useState } from 'react';
+import Header from '~/components/header/Header';
+import { Heading } from './Heading';
 
 import { ObjectLink } from './InternalLink';
 import { ObjectPreview } from './ObjectPreview';
+import { Text } from './Text';
 
 export interface ObjectDetailsProps {
     id: string;
@@ -20,12 +23,11 @@ interface ImageProps {
     alt?: string;
 }
 
-function Image({ onClick, className, alt, src, ...rest }: ImageProps) {
+function Image({ className, alt, src, ...rest }: ImageProps) {
     return (
         <img
             alt={alt}
             src={src}
-            onClick={onClick}
             className={clsx('rounded-md', 'cursor-pointer', className)}
             {...rest}
         />
@@ -45,12 +47,22 @@ export function ObjectDetails({ id, image, name, type }: ObjectDetailsProps) {
             {image && (
                 <>
                     <ObjectPreview open={open} onClose={close}>
-                        <Image
-                            onClick={close}
-                            alt={name}
-                            src={image}
-                            className="max-h-[80vh] max-w-[80vw]"
-                        />
+                        <div className="flex flex-col gap-5">
+                            <Image
+                                alt={name}
+                                src={image}
+                                className="max-h-[80vh] max-w-[80vw]"
+                            />
+                            <Heading
+                                variant="heading2/semibold"
+                                color="sui-light"
+                            >
+                                {name}
+                            </Heading>
+                            <Text color="gray-60" variant="body/medium">
+                                {type}
+                            </Text>
+                        </div>
                     </ObjectPreview>
                     <Image
                         onClick={openPreview}
