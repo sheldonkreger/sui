@@ -27,33 +27,35 @@ export function LightBox({ open, onClose, children }: LightBoxProps) {
                     leaveTo="opacity-0"
                 >
                     <div
-                        className="fixed inset-0 bg-gray-100/80"
+                        className="fixed inset-0 z-10 bg-gray-100/80"
                         aria-hidden="true"
                     />
                 </Transition.Child>
-                <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0 scale-95"
-                    enterTo="opacity-100 scale-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100 scale-100"
-                    leaveTo="opacity-0 scale-95"
-                >
-                    <div className="fixed inset-0 flex items-center justify-center p-4">
-                        <div className="relative">
-                            <div className="absolute -right-12">
-                                <IconButton
-                                    onClick={onClose}
-                                    className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-gray-90 p-0 text-sui-light outline-none hover:scale-105 active:scale-100"
-                                    aria-label="Close"
-                                    icon={X12}
-                                />
+                <div className="fixed inset-0 z-10 overflow-y-auto">
+                    <div className="flex min-h-full items-center justify-center">
+                        <Transition.Child
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom="opacity-0 scale-95"
+                            enterTo="opacity-100 scale-100"
+                            leave="ease-in duration-200"
+                            leaveFrom="opacity-100 scale-100"
+                            leaveTo="opacity-0 scale-95"
+                        >
+                            <div className="w-full max-w-xl transform align-middle transition-all">
+                                <div className="absolute -right-12">
+                                    <IconButton
+                                        onClick={onClose}
+                                        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-gray-90 p-0 text-sui-light outline-none hover:scale-105 active:scale-100"
+                                        aria-label="Close"
+                                        icon={X12}
+                                    />
+                                </div>
+                                {children}
                             </div>
-                            {children}
-                        </div>
+                        </Transition.Child>
                     </div>
-                </Transition.Child>
+                </div>
             </Dialog>
         </Transition>
     );

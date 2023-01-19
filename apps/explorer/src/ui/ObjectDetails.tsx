@@ -17,7 +17,7 @@ export interface ObjectDetailsProps {
 }
 
 interface ImageProps {
-    onClick: () => void;
+    onClick?: () => void;
     className: string;
     src: string;
     alt?: string;
@@ -51,7 +51,7 @@ export function ObjectDetails({ id, image, name, type }: ObjectDetailsProps) {
                             <Image
                                 alt={name}
                                 src={image}
-                                className="max-h-[80vh] max-w-[80vw]"
+                                className="rounded-none"
                             />
                             <Heading
                                 variant="heading2/semibold"
