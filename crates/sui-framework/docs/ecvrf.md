@@ -57,6 +57,9 @@ Verify a proof for a Ristretto ECVRF. Returns true if the proof is valid and cor
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="ecvrf.md#0x2_ecvrf_ecvrf_verify">ecvrf_verify</a>(<a href="">hash</a>: &<a href="">vector</a>&lt;u8&gt;, alpha_string: &<a href="">vector</a>&lt;u8&gt;, public_key: &<a href="">vector</a>&lt;u8&gt;, proof: &<a href="">vector</a>&lt;u8&gt;): bool
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="ecvrf.md#0x2_ecvrf_ecvrf_verify">ecvrf_verify</a>(proof: &<a href="">vector</a>&lt;u8&gt;, alpha_string: &<a href="">vector</a>&lt;u8&gt;, public_key: &<a href="">vector</a>&lt;u8&gt;, <a href="">hash</a>: &<a href="">vector</a>&lt;u8&gt;): bool
 </code></pre>
 
 
@@ -65,7 +68,7 @@ Verify a proof for a Ristretto ECVRF. Returns true if the proof is valid and cor
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="ecvrf.md#0x2_ecvrf_ecvrf_verify">ecvrf_verify</a>(<a href="">hash</a>: &<a href="">vector</a>&lt;u8&gt;, alpha_string: &<a href="">vector</a>&lt;u8&gt;, public_key: &<a href="">vector</a>&lt;u8&gt;, proof: &<a href="">vector</a>&lt;u8&gt;): bool;
+<pre><code><b>public</b> <b>native</b> <b>fun</b> <a href="ecvrf.md#0x2_ecvrf_ecvrf_verify">ecvrf_verify</a>(proof: &<a href="">vector</a>&lt;u8&gt;, alpha_string: &<a href="">vector</a>&lt;u8&gt;, public_key: &<a href="">vector</a>&lt;u8&gt;, <a href="">hash</a>: &<a href="">vector</a>&lt;u8&gt;): bool;
 </code></pre>
 
 
