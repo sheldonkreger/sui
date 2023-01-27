@@ -295,7 +295,7 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
   public async extractObjectIds(txn: SignableTransaction): Promise<ObjectId[]> {
     const ret = await this.extractInputObjectIds(txn);
     if ('gasPayment' in txn.data && txn.data['gasPayment']) {
-      ret.push(txn.data['gasPayment']);
+      ret.concat(txn.data['gasPayment']);
     }
     return ret;
   }
@@ -350,15 +350,19 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
         );
       }
     }
-    const gasPayment = await this.provider.getObjectRef(gasObjectId);
+    var gasPayment = await this.provider.getObjectRef(gasObjectId);
     if (!originalTx.data.gasBudget) {
       throw new Error(
         'Must provide a valid gas budget for contructing TransactionData',
       );
     }
+    const version = await this.provider.getRpcApiVersion();
     return {
       kind: tx,
-      gasPayment: gasPayment!,
+      gasPayment:
+        version?.major === 0 && version?.minor < 25
+          ? gasPayment!
+          : [gasPayment!],
       gasPrice: originalTx.data.gasPrice!,
       gasBudget: originalTx.data.gasBudget!,
       sender: signerAddress,
@@ -420,7 +424,7 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
       return this.transformTransactionToSignableTransaction(
         tx.kind.Single,
         tx.gasBudget,
-        tx.gasPayment,
+        tx.gasPayment[0],
         tx.gasPrice,
       );
     }
@@ -429,7 +433,7 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
         this.transformTransactionToSignableTransaction(
           t,
           tx.gasBudget,
-          tx.gasPayment,
+          tx.gasPayment[0],
           tx.gasPrice,
         ),
       ),
@@ -490,7 +494,7 @@ export class LocalTxnDataSerializer implements TxnDataSerializer {
       return {
         kind: 'transferSui',
         data: {
-          suiObjectId: gasPayment!.objectId,
+          suiObjectId: gasPayment?.objectId,
           recipient: tx.TransferSui.recipient,
           amount:
             'Some' in tx.TransferSui.amount ? tx.TransferSui.amount.Some : null,
