@@ -70,13 +70,13 @@ import {
   WebsocketClient,
   WebsocketClientOptions,
 } from '../rpc/websocket-client';
-import { ApiEndpoints, Network, NETWORK_TO_API } from '../utils/api-endpoints';
 import { requestSuiFromFaucet } from '../rpc/faucet-client';
 import { lt } from '@suchipi/femver';
 import { Base64DataBuffer } from '../serialization/base64';
 import { any, is, number, array } from 'superstruct';
 import { UnserializedSignableTransaction } from '../signers/txn-data-serializers/txn-data-serializer';
 import { LocalTxnDataSerializer } from '../signers/txn-data-serializers/local-txn-data-serializer';
+import { Connection, devnetConnection } from '../rpc/connection';
 
 /**
  * Configuration options for the JsonRpcProvider. If the value of a field is not provided,
@@ -118,7 +118,7 @@ const DEFAULT_OPTIONS: RpcProviderOptions = {
 };
 
 export class JsonRpcProvider extends Provider {
-  public endpoints: ApiEndpoints;
+  public connection: Connection;
   protected client: JsonRpcClient;
   protected wsClient: WebsocketClient;
   private rpcApiVersion: RpcApiVersion | undefined;
@@ -126,29 +126,23 @@ export class JsonRpcProvider extends Provider {
   /**
    * Establish a connection to a Sui RPC endpoint
    *
-   * @param endpoint URL to the Sui RPC endpoint, or a `Network` enum
+   * @param connection The `Connection` object containing configuration for the network.
    * @param options configuration options for the provider
    */
   constructor(
-    endpoint: string | Network = Network.DEVNET,
+    // TODO: Probably remove the default endpoint here:
+    connection: Connection = devnetConnection,
     public options: RpcProviderOptions = DEFAULT_OPTIONS
   ) {
     super();
 
-    if ((Object.values(Network) as string[]).includes(endpoint)) {
-      this.endpoints = NETWORK_TO_API[endpoint as Network];
-    } else {
-      this.endpoints = {
-        fullNode: endpoint,
-        faucet: options.faucetURL,
-      };
-    }
+    this.connection = connection;
 
     const opts = { ...DEFAULT_OPTIONS, ...options };
 
-    this.client = new JsonRpcClient(this.endpoints.fullNode);
+    this.client = new JsonRpcClient(this.connection.fullnode);
     this.wsClient = new WebsocketClient(
-      this.endpoints.fullNode,
+      this.connection.websocket,
       opts.skipDataValidation!,
       opts.socketOptions
     );
@@ -183,16 +177,16 @@ export class JsonRpcProvider extends Provider {
     recipient: SuiAddress,
     httpHeaders?: HttpHeaders
   ): Promise<FaucetResponse> {
-    if (!this.endpoints.faucet) {
+    if (!this.connection.faucet) {
       throw new Error('Faucet URL is not specified');
     }
-    return requestSuiFromFaucet(this.endpoints.faucet, recipient, httpHeaders);
+    return requestSuiFromFaucet(this.connection.faucet, recipient, httpHeaders);
   }
 
   // Coins
   async getCoins(
     owner: SuiAddress,
-    coinType: String | null = null,
+    coinType: string | null = null,
     cursor: ObjectId | null = null,
     limit: number | null = null
   ): Promise<PaginatedCoins> {
@@ -233,7 +227,7 @@ export class JsonRpcProvider extends Provider {
 
   async getBalance(
     owner: SuiAddress,
-    coinType: String | null = null
+    coinType: string | null = null
   ): Promise<CoinBalance> {
     try {
       if (!owner || !isValidSuiAddress(normalizeSuiAddress(owner))) {
@@ -281,7 +275,7 @@ export class JsonRpcProvider extends Provider {
     }
   }
 
-  async getTotalSupply(coinType: String): Promise<CoinSupply> {
+  async getTotalSupply(coinType: string): Promise<CoinSupply> {
     try {
       return await this.client.requestWithType(
         'sui_getTotalSupply',

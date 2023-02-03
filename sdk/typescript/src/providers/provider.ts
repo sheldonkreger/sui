@@ -90,7 +90,7 @@ export abstract class Provider {
    */
   abstract getCoins(
     owner: SuiAddress,
-    coinType: String | null,
+    coinType: string | null,
     cursor: ObjectId | null,
     limit: number | null
   ): Promise<PaginatedCoins>;
@@ -112,7 +112,7 @@ export abstract class Provider {
    */
   abstract getBalance(
     owner: SuiAddress,
-    coinType: String | null
+    coinType: string | null
   ): Promise<CoinBalance>;
 
   /**
