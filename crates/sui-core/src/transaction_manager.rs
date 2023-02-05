@@ -119,15 +119,13 @@ impl TransactionManager {
             let _tx_lock = epoch_store.acquire_tx_lock(&digest);
 
             // if effects indicate a success then we need to add and wait for argument packages,
-            // otherwise we can skip. default to true to unbrick checkpoint catch up.
-            // Otherwise default to false.
-            let mut skip_adding_type_arg_deps = digest_to_effects.is_some();
+            // otherwise we can skip. default to not adding these to unbrick catch up.
+            let mut skip_adding_type_arg_deps = true;
             if let Some(digest_to_effects) = &digest_to_effects {
                 if let Some(effect) = digest_to_effects.get(cert.digest()) {
                     skip_adding_type_arg_deps = effect.status.is_err();
                 }
             }
-
             let mut inputs = cert.data().intent_message.value.input_objects()?;
             if !skip_adding_type_arg_deps {
                 for package in cert.data().intent_message.value.type_argument_packages() {
