@@ -168,6 +168,9 @@ impl TransactionManager {
                 for obj in objects {
                     if let Some(txns) = inner.missing_inputs.get_mut(&obj) {
                         txns.remove(&digest);
+                        if txns.is_empty() {
+                            inner.missing_inputs.remove(&obj);
+                        }
                     }
                     if let Some(count) = inner.input_objects.get_mut(&obj.0) {
                         *count -= 1;
