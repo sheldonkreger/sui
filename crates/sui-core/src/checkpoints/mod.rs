@@ -697,8 +697,8 @@ impl CheckpointBuilder {
             .try_execute_immediately(&cert, &self.epoch_store)
             .await?;
         debug!(
-            "Effects of the change epoch transaction: {:?}",
-            signed_effect.data()
+            "Size of the advance epoch transaction effects: {:?}",
+            bcs::to_bytes(signed_effect.data()).unwrap().len()
         );
         self.epoch_store.record_is_safe_mode_metric(
             self.state.get_sui_system_state_object().unwrap().safe_mode,
