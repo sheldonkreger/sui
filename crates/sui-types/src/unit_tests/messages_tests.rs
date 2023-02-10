@@ -179,7 +179,13 @@ fn test_new_with_signatures() {
     for _ in 0..5 {
         let (_, sec): (_, AuthorityKeyPair) = get_key_pair();
         let name = AuthorityPublicKeyBytes::from(sec.public());
-        signatures.push(AuthoritySignInfo::new(0, &message, name, &sec));
+        signatures.push(AuthoritySignInfo::new(
+            0,
+            &message,
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+            name,
+            &sec,
+        ));
         authorities.insert(name, 1);
     }
     let (_, sec): (_, AuthorityKeyPair) = get_key_pair();
@@ -225,6 +231,7 @@ fn test_handle_reject_malicious_signature() {
             signatures.push(AuthoritySignInfo::new(
                 0,
                 &Foo("some data".to_string()),
+                Intent::default().with_scope(IntentScope::SenderSignedTransaction),
                 name,
                 &sec,
             ))
@@ -236,7 +243,11 @@ fn test_handle_reject_malicious_signature() {
         AuthorityStrongQuorumSignInfo::new_from_auth_sign_infos(signatures, &committee).unwrap();
     {
         let (_, sec): (_, AuthorityKeyPair) = get_key_pair();
-        let sig = AuthoritySignature::new(&message, committee.epoch, &sec);
+        let sig = AuthoritySignature::new_secure(
+            &IntentMessage::new(Intent::default(), message.clone()),
+            &committee.epoch,
+            &sec,
+        );
         quorum.signature.add_signature(sig).unwrap();
     }
     let (mut obligation, idx) = get_obligation_input(&message);
@@ -259,6 +270,7 @@ fn test_auth_sig_commit_to_wrong_epoch_id_fail() {
         signatures.push(AuthoritySignInfo::new(
             1,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -270,7 +282,11 @@ fn test_auth_sig_commit_to_wrong_epoch_id_fail() {
     {
         let (_, sec): (_, AuthorityKeyPair) = get_key_pair();
         // signature commits to epoch 0
-        let sig = AuthoritySignature::new(&message, 1, &sec);
+        let sig = AuthoritySignature::new_secure(
+            &IntentMessage::new(Intent::default(), message.clone()),
+            &1,
+            &sec,
+        );
         quorum.signature.add_signature(sig).unwrap();
     }
     let (mut obligation, idx) = get_obligation_input(&message);
@@ -297,6 +313,7 @@ fn test_bitmap_out_of_range() {
         signatures.push(AuthoritySignInfo::new(
             0,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -328,6 +345,7 @@ fn test_reject_extra_public_key() {
         signatures.push(AuthoritySignInfo::new(
             0,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -367,6 +385,7 @@ fn test_reject_reuse_signatures() {
         signatures.push(AuthoritySignInfo::new(
             0,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -402,6 +421,7 @@ fn test_empty_bitmap() {
         signatures.push(AuthoritySignInfo::new(
             0,
             &Foo("some data".to_string()),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
             name,
             &sec,
         ));
@@ -600,11 +620,19 @@ fn test_user_signature_committed_in_signed_transactions() {
     let committee = Committee::new(0, authorities.clone()).unwrap();
     assert!(signed_tx_a
         .auth_sig()
-        .verify(transaction_a.data(), &committee)
+        .verify_secure(
+            transaction_a.data(),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+            &committee
+        )
         .is_ok());
     assert!(signed_tx_a
         .auth_sig()
-        .verify(transaction_b.data(), &committee)
+        .verify_secure(
+            transaction_b.data(),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+            &committee
+        )
         .is_err());
 
     // Test hash non-equality
@@ -676,7 +704,11 @@ fn verify_sender_signature_correctly_with_flag() {
     // authority accepts signs tx after verification
     assert!(signed_tx
         .auth_sig()
-        .verify(transaction.data(), &committee)
+        .verify_secure(
+            transaction.data(),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+            &committee
+        )
         .is_ok());
 
     let transaction_1 =
@@ -700,12 +732,20 @@ fn verify_sender_signature_correctly_with_flag() {
     // signature verified
     assert!(signed_tx_1
         .auth_sig()
-        .verify(transaction_1.data(), &committee)
+        .verify_secure(
+            transaction_1.data(),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+            &committee
+        )
         .is_ok());
 
     assert!(signed_tx_1
         .auth_sig()
-        .verify(transaction.data(), &committee)
+        .verify_secure(
+            transaction.data(),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+            &committee
+        )
         .is_err());
 
     // create transaction with r1 signer
@@ -725,7 +765,11 @@ fn verify_sender_signature_correctly_with_flag() {
     );
     assert!(signed_tx_3
         .auth_sig()
-        .verify(tx_32.data(), &committee)
+        .verify_secure(
+            tx_32.data(),
+            Intent::default().with_scope(IntentScope::SenderSignedTransaction),
+            &committee
+        )
         .is_ok());
 }
 

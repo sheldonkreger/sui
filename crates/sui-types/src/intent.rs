@@ -39,6 +39,7 @@ impl TryFrom<u8> for IntentVersion {
 #[repr(u8)]
 pub enum AppId {
     Sui = 0,
+    Narwhal = 1,
 }
 
 impl TryFrom<u8> for AppId {
@@ -64,6 +65,9 @@ pub enum IntentScope {
     TransactionEffects = 1,
     CheckpointSummary = 2,
     PersonalMessage = 3,
+    SenderSignedTransaction = 4,
+    ProofOfPossession = 5,
+    Other = 6,
 }
 
 impl TryFrom<u8> for IntentScope {

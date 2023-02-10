@@ -9,7 +9,7 @@ use crate::crypto::{
     Ed25519SuiSignature, EmptySignInfo, Signature, SuiSignature, SuiSignatureInner, ToFromBytes,
 };
 use crate::gas::GasCostSummary;
-use crate::intent::{Intent, IntentMessage};
+use crate::intent::{Intent, IntentMessage, IntentScope};
 use crate::message_envelope::{Envelope, Message, TrustedEnvelope, VerifiedEnvelope};
 use crate::messages_checkpoint::{CheckpointSequenceNumber, CheckpointSignatureMessage};
 use crate::object::{MoveObject, Object, ObjectFormatOptions, Owner, PACKAGE_VERSION};
@@ -1078,6 +1078,7 @@ impl SenderSignedData {
 
 impl Message for SenderSignedData {
     type DigestType = TransactionDigest;
+    const SCOPE: IntentScope = IntentScope::SenderSignedTransaction;
 
     fn digest(&self) -> Self::DigestType {
         TransactionDigest::new(sha3_hash(&self.intent_message.value))
@@ -2034,6 +2035,7 @@ impl TransactionEffects {
 
 impl Message for TransactionEffectsDigest {
     type DigestType = TransactionEffectsDigest;
+    const SCOPE: IntentScope = IntentScope::Other;
 
     fn digest(&self) -> Self::DigestType {
         *self
@@ -2046,6 +2048,7 @@ impl Message for TransactionEffectsDigest {
 
 impl Message for ExecutionDigests {
     type DigestType = TransactionDigest;
+    const SCOPE: IntentScope = IntentScope::Other;
 
     fn digest(&self) -> Self::DigestType {
         self.transaction
@@ -2058,6 +2061,7 @@ impl Message for ExecutionDigests {
 
 impl Message for TransactionEffects {
     type DigestType = TransactionEffectsDigest;
+    const SCOPE: IntentScope = IntentScope::TransactionEffects;
 
     fn digest(&self) -> Self::DigestType {
         TransactionEffectsDigest::new(sha3_hash(self))

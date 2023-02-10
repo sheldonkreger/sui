@@ -6,9 +6,10 @@ use crate::certificate_proof::CertificateProof;
 use crate::committee::{Committee, EpochId};
 use crate::crypto::{
     AuthorityQuorumSignInfo, AuthoritySignInfo, AuthoritySignInfoTrait, AuthoritySignature,
-    AuthorityStrongQuorumSignInfo, EmptySignInfo, Signable,
+    AuthorityStrongQuorumSignInfo, EmptySignInfo,
 };
 use crate::error::SuiResult;
+use crate::intent::{Intent, IntentScope};
 use once_cell::sync::OnceCell;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
@@ -16,6 +17,7 @@ use std::ops::{Deref, DerefMut};
 
 pub trait Message {
     type DigestType: Clone + Debug;
+    const SCOPE: IntentScope;
 
     fn digest(&self) -> Self::DigestType;
 
@@ -107,7 +109,7 @@ impl<T: Message> Envelope<T, EmptySignInfo> {
 
 impl<T> Envelope<T, AuthoritySignInfo>
 where
-    T: Message + Signable<Vec<u8>>,
+    T: Message + Serialize,
 {
     pub fn new(
         epoch: EpochId,
@@ -115,7 +117,13 @@ where
         secret: &dyn signature::Signer<AuthoritySignature>,
         authority: AuthorityName,
     ) -> Self {
-        let auth_signature = AuthoritySignInfo::new(epoch, &data, authority, secret);
+        let auth_signature = AuthoritySignInfo::new(
+            epoch,
+            &data,
+            Intent::default().with_scope(T::SCOPE),
+            authority,
+            secret,
+        );
         Self {
             digest: OnceCell::new(),
             data,
@@ -129,7 +137,11 @@ where
 
     pub fn verify_signature(&self, committee: &Committee) -> SuiResult {
         self.data.verify()?;
-        self.auth_signature.verify(self.data(), committee)
+        self.auth_signature.verify_secure(
+            self.data(),
+            Intent::default().with_scope(T::SCOPE),
+            committee,
+        )
     }
 
     pub fn verify(
@@ -145,7 +157,7 @@ where
 
 impl<T, const S: bool> Envelope<T, AuthorityQuorumSignInfo<S>>
 where
-    T: Message + Signable<Vec<u8>>,
+    T: Message + Serialize,
 {
     pub fn new(
         data: T,
@@ -171,7 +183,11 @@ where
     // and make sure they all call verify to avoid repeated verifications.
     pub fn verify_signature(&self, committee: &Committee) -> SuiResult {
         self.data.verify()?;
-        self.auth_signature.verify(self.data(), committee)
+        self.auth_signature.verify_secure(
+            self.data(),
+            Intent::default().with_scope(T::SCOPE),
+            committee,
+        )
     }
 
     pub fn verify(
