@@ -49,6 +49,7 @@ use sui_storage::{
 use sui_types::committee::Committee;
 use sui_types::crypto::KeypairTraits;
 use sui_types::quorum_driver_types::QuorumDriverEffectsQueueResult;
+use tokio::runtime::Runtime;
 use tokio::sync::{watch, Mutex};
 use tokio::task::JoinHandle;
 use tower::ServiceBuilder;
@@ -90,7 +91,7 @@ use sui_json_rpc::governance_api::GovernanceReadApi;
 pub struct SuiNode {
     config: NodeConfig,
     validator_components: Mutex<Option<ValidatorComponents>>,
-    _json_rpc_service: Option<ServerHandle>,
+    _json_rpc_service: Option<(ServerHandle, Runtime)>,
     state: Arc<AuthorityState>,
     transaction_orchestrator: Option<Arc<TransactiondOrchestrator<NetworkAuthorityClient>>>,
     registry_service: RegistryService,
@@ -791,7 +792,7 @@ pub async fn build_server(
     transaction_orchestrator: &Option<Arc<TransactiondOrchestrator<NetworkAuthorityClient>>>,
     config: &NodeConfig,
     prometheus_registry: &Registry,
-) -> Result<Option<ServerHandle>> {
+) -> Result<Option<(ServerHandle, Runtime)>> {
     // Validators do not expose these APIs
     if config.consensus_config().is_some() {
         return Ok(None);

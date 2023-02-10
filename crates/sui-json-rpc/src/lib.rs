@@ -12,6 +12,7 @@ use jsonrpsee::server::{AllowHosts, ServerBuilder};
 use jsonrpsee::RpcModule;
 use prometheus::Registry;
 use tap::TapFallible;
+use tokio::runtime::Runtime;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use tracing::{info, warn};
 
@@ -71,7 +72,7 @@ impl JsonRpcServerBuilder {
     pub async fn start(
         mut self,
         listen_address: SocketAddr,
-    ) -> Result<ServerHandle, anyhow::Error> {
+    ) -> Result<(ServerHandle, Runtime), anyhow::Error> {
         let acl = match env::var("ACCESS_CONTROL_ALLOW_ORIGIN") {
             Ok(value) => {
                 let allow_hosts = value
@@ -128,7 +129,7 @@ impl JsonRpcServerBuilder {
         info!(local_addr =? addr, "Sui JSON-RPC server listening on {addr}");
         info!("Available JSON-RPC methods : {:?}", methods_names);
 
-        Ok(handle)
+        Ok((handle, rt))
     }
 }
 
