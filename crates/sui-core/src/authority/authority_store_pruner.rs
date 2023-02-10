@@ -29,7 +29,7 @@ use typed_store::Map;
 use super::authority_store_tables::AuthorityPerpetualTables;
 
 const MAX_OPS_IN_ONE_WRITE_BATCH: u64 = 10000;
-const ENABLE_LIVE_PRUNER: bool = cfg!(test) || cfg!(msim);
+const ENABLE_LIVE_PRUNER: bool = true;
 
 pub struct AuthorityStorePruner {
     _objects_pruner_cancel_handle: oneshot::Sender<()>,
