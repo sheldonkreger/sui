@@ -110,11 +110,16 @@ impl JsonRpcServerBuilder {
             .layer(cors)
             .layer(metrics_layer);
 
+        let rt = tokio::runtime::Builder::new_multi_thread()
+            .enable_all()
+            .build()?;
+
         let server = ServerBuilder::default()
             .max_response_body_size(2 << 30)
             .max_connections(max_connection)
             .set_host_filtering(AllowHosts::Any)
             .set_middleware(middleware)
+            .custom_tokio_runtime(rt.handle().clone())
             .build(listen_address)
             .await?;
         let addr = server.local_addr()?;
