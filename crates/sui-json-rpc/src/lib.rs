@@ -105,9 +105,10 @@ impl JsonRpcServerBuilder {
             })
             .unwrap_or(u32::MAX);
 
-        //let metrics_layer = MetricsLayer::new(&self.registry, &methods_names);
-        let middleware = tower::ServiceBuilder::new().layer(cors);
-        //.layer(metrics_layer);
+        let metrics_layer = MetricsLayer::new(&self.registry, &methods_names);
+        let middleware = tower::ServiceBuilder::new()
+            .layer(cors)
+            .layer(metrics_layer);
 
         let server = ServerBuilder::default()
             .max_response_body_size(2 << 30)
