@@ -30,6 +30,7 @@ export default function OwnedObjectView({ results }: { results: DataType }) {
         },
     };
     return (
+<<<<<<< HEAD
         <div className="grid w-full grid-cols-1 divide-x-0 divide-gray-45 md:grid-cols-2 md:divide-x">
             {coin_results.length > 0 && (
                 <div className="space-y-5 pt-5 pr-0 xl:pr-10">
@@ -57,5 +58,31 @@ export default function OwnedObjectView({ results }: { results: DataType }) {
                 />
             </div>
         </div>
+=======
+        <div className="mt-0"></div>
+        // <div className={styles.layout}>
+        //     {coin_results.length > 0 && (
+        //         <div>
+        //             <div className={styles.ownedobjectheader}>
+        //                 <h2>Coins</h2>
+        //             </div>
+        //             <OwnedCoinView results={coin_results} />
+        //         </div>
+        //     )}
+        //     {other_results.length > 0 && (
+        //         <div data-testid="owned-nfts">
+        //             <div className={styles.ownedobjectheader}>
+        //                 <h2>NFTs</h2>
+        //             </div>
+        //             <PaginationLogic
+        //                 results={other_results}
+        //                 viewComponentFn={viewFn}
+        //                 itemsPerPage={ITEMS_PER_PAGE}
+        //                 stats={nftFooter.stats}
+        //             />
+        //         </div>
+        //     )}
+        // </div>
+>>>>>>> 9746cb1d4 (more work)
     );
 }
