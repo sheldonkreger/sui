@@ -53,11 +53,7 @@ module.exports = {
       hero: {
         DEFAULT: "#0284AD",
         dark: "#007195",
-<<<<<<< HEAD
-        darkest: "#15527B",
-=======
         darker: "#006195",
->>>>>>> 4fe45ce2b (create ObjectDetails UI component; start to move away from DisplayBox)
       },
       success: {
         DEFAULT: "#2DD7A7",
