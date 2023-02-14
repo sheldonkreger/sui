@@ -5,6 +5,7 @@ services:
     image: mysten/sui-rosetta-testnet
     ports:
       - "9002:9002"
+      - "9000:9000"
     expose:
       - "9002"
       - "9000"
