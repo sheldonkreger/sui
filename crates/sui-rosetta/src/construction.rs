@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use axum::{Extension, Json};
-use fastcrypto::encoding::{Encoding, Hex};
+use fastcrypto::encoding::Hex;
 use sui_types::base_types::SuiAddress;
 use sui_types::crypto;
 use sui_types::crypto::{SignatureScheme, ToFromBytes};
@@ -67,7 +67,7 @@ pub async fn payloads(
         unsigned_transaction: Hex::from_bytes(&intent_msg_bytes),
         payloads: vec![SigningPayload {
             account_identifier: address.into(),
-            hex_bytes: Hex::encode(bcs::to_bytes(&intent_msg)?),
+            hex_bytes: Hex::from_bytes(&bcs::to_bytes(&intent_msg)?),
             signature_type: Some(SignatureType::Ed25519),
         }],
     })
@@ -200,7 +200,7 @@ pub async fn metadata(
         .await?
         .reference_gas_price;
 
-    let (tx_metadata, gas) = match &option.internal_operation {
+    let (tx_metadata, gas, budget) = match &option.internal_operation {
         InternalOperation::PaySui {
             sender, amounts, ..
         } => {
@@ -226,7 +226,7 @@ pub async fn metadata(
                 .collect::<Vec<_>>();
             // gas is always the first coin for pay_sui
             let gas = sender_coins[0];
-            (TransactionMetadata::PaySui(sender_coins), gas)
+            (TransactionMetadata::PaySui(sender_coins), gas, 1000)
         }
         InternalOperation::Delegation {
             sender,
@@ -252,7 +252,7 @@ pub async fn metadata(
                     Some(*amount as u64),
                     *validator,
                     None,
-                    2000,
+                    13000,
                 )
                 .await?;
 
@@ -269,9 +269,11 @@ pub async fn metadata(
                     locked_until_epoch: *locked_until_epoch,
                 },
                 gas,
+                13000,
             )
         }
     };
+
     // get gas estimation from dry-run, this will also return any tx error.
     let data = option
         .internal_operation
@@ -279,8 +281,8 @@ pub async fn metadata(
             tx_metadata: tx_metadata.clone(),
             sender,
             gas,
-            gas_price,
-            budget: 1000,
+            gas_price: 1,
+            budget,
         })?;
     let dry_run = context.client.read_api().dry_run_transaction(data).await?;
 
