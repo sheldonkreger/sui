@@ -25,6 +25,7 @@ const textStyles = cva(['break-words'], {
             bold: 'font-bold',
         },
         color: {
+            white: 'text-white',
             'gray-100': 'text-gray-100',
             'gray-90': 'text-gray-90',
             'gray-80': 'text-gray-80',
