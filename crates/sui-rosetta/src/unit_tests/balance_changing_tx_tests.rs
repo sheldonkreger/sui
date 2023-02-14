@@ -28,6 +28,7 @@ use sui_types::messages::{
     ObjectArg, Pay, PayAllSui, PaySui, SingleTransactionKind, Transaction, TransactionData,
     TransactionKind, TransferSui,
 };
+use sui_types::SUI_FRAMEWORK_OBJECT_ID;
 use test_utils::network::TestClusterBuilder;
 
 use crate::state::extract_balance_changes_from_ops;
@@ -469,9 +470,20 @@ async fn test_delegation_parsing() -> Result<(), anyhow::Error> {
         )
         .await?;
 
+    let sui_framework = client
+        .read_api()
+        .get_object(SUI_FRAMEWORK_OBJECT_ID)
+        .await
+        .unwrap()
+        .object()
+        .unwrap()
+        .reference
+        .to_object_ref();
+
     let ops: Operations = data.clone().try_into()?;
     let metadata = ConstructionMetadata {
         tx_metadata: TransactionMetadata::Delegation {
+            sui_framework,
             coins: vec![coin1, coin2],
             locked_until_epoch: None,
         },
