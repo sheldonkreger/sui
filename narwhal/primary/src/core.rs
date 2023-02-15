@@ -15,7 +15,7 @@ use crypto::{NetworkPublicKey, PublicKey, Signature};
 use fastcrypto::{hash::Hash as _, signature_service::SignatureService};
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
-use mysten_metrics::{monitored_future, spawn_logged_monitored_task};
+use mysten_metrics::{monitored_future, monitored_scope, spawn_logged_monitored_task};
 use network::{anemo_ext::NetworkExt, CancelOnDropHandler, ReliableNetwork};
 use std::time::Duration;
 use std::{collections::HashMap, sync::Arc, time::Instant};
@@ -537,11 +537,14 @@ impl Core {
             )
         );
         let digest = certificate.digest();
+        let a_certificate_store_read_scope = monitored_scope("ArunCertificateStoreRead");
         if self.certificate_store.contains(&digest)? {
             trace!("Certificate {digest:?} has already been processed. Skip processing.");
             self.metrics.duplicate_certificates_processed.inc();
+            drop(a_certificate_store_read_scope);
             return Ok(());
         }
+        drop(a_certificate_store_read_scope);
         debug!(
             "Processing certificate {:?} round:{:?}",
             certificate,
@@ -584,6 +587,8 @@ impl Core {
 
         // Ensure either we have all the ancestors of this certificate, or the parents have been garbage collected.
         // If we don't, the synchronizer will start fetching missing certificates.
+        // TODO add monitored scope around check parents
+        let a_check_cert_parents = monitored_scope("ArunCheckCertParents");
         if certificate.round() > self.gc_round + 1
             && !self.synchronizer.check_parents(&certificate).await?
         {
@@ -595,13 +600,18 @@ impl Core {
                 .certificates_suspended
                 .with_label_values(&["missing_parents"])
                 .inc();
+            drop(a_check_cert_parents);
             return Err(DagError::Suspended);
         }
+        drop(a_check_cert_parents);
 
         // Store the certificate. Afterwards, the certificate must be sent to consensus
         // or Narwhal needs to shutdown, to avoid insistencies certificate store and
         // consensus dag.
+        // TODO add monitored scope around cert store write
+        let a_write_cert_store = monitored_scope("ArunWriteCertStore");
         self.certificate_store.write(certificate.clone())?;
+        drop(a_write_cert_store);
 
         // Update metrics for processed certificates.
         self.highest_processed_round = self.highest_processed_round.max(certificate.round());

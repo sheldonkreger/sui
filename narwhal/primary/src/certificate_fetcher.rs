@@ -4,13 +4,15 @@
 use crate::metrics::PrimaryMetrics;
 use config::{Committee, SharedWorkerCache};
 use crypto::{NetworkPublicKey, PublicKey};
+use dag::node_dag::Affiliated;
+use fastcrypto::hash::Hash;
 use futures::{stream::FuturesUnordered, StreamExt};
 use itertools::Itertools;
 use mysten_metrics::{monitored_future, monitored_scope, spawn_logged_monitored_task};
 use network::PrimaryToPrimaryRpc;
 use rand::{rngs::ThreadRng, seq::SliceRandom};
 use std::{
-    collections::{BTreeMap, BTreeSet},
+    collections::{BTreeMap, BTreeSet, HashSet},
     sync::Arc,
     time::Duration,
 };
@@ -25,8 +27,8 @@ use tracing::{debug, error, instrument, trace, warn};
 use types::{
     error::{DagError, DagResult},
     metered_channel::{Receiver, Sender},
-    Certificate, ConditionalBroadcastReceiver, FetchCertificatesRequest, FetchCertificatesResponse,
-    Round,
+    Certificate, CertificateDigest, ConditionalBroadcastReceiver, FetchCertificatesRequest,
+    FetchCertificatesResponse, Round,
 };
 
 #[cfg(test)]
@@ -440,58 +442,41 @@ async fn process_certificates_helper(
             MAX_CERTIFICATES_TO_FETCH,
         ));
     }
-    // Verify certificates in parallel.
-    // In PrimaryReceiverHandler, certificates already in storage are ignored.
-    // The check is unnecessary here, because there is no concurrent processing of older
-    // certificates. For byzantine failures, the check will not be effective anyway.
+    // Simple Verification - Only verify tip of certificate chain and then
+    // just assume all parent certs are valid.
     let verify_scope = monitored_scope("VerifyingFetchedCertificates");
     let all_certificates = response.certificates;
-    let verify_tasks = all_certificates
-        .chunks(VERIFY_CERTIFICATES_BATCH_SIZE)
-        .map(|certs| {
-            let certs = certs.to_vec();
-            let committee = committee.clone();
-            let worker_cache = worker_cache.clone();
-            // Use threads dedicated to computation heavy work.
-            spawn_blocking(move || {
-                for c in &certs {
-                    let worker_cache = worker_cache.clone();
-                    c.verify(&committee, worker_cache)?;
-                }
-                Ok::<Vec<Certificate>, DagError>(certs)
-            })
-        })
-        .collect_vec();
-    // Send verified certificates to core for processing, in the same order as received.
-    let mut processing_tasks = JoinSet::new();
-    for task in verify_tasks {
-        let certificates = task.await.map_err(|_| DagError::Canceled)??;
-        let (tx_done, rx_done) = oneshot::channel();
-        if let Err(e) = tx_certificates_loopback
-            .send(CertificateLoopbackMessage {
-                certificates,
-                done: tx_done,
-            })
-            .await
-        {
-            return Err(DagError::ClosedChannel(format!(
-                "Failed to send fetched certificate to processing. tx_certificates_loopback error: {}",
-                e
-            )));
+
+    let mut verified_set: HashSet<CertificateDigest> = HashSet::new();
+    for cert in all_certificates.iter().rev() {
+        if !verified_set.contains(&cert.digest()) {
+            cert.verify(&committee.clone(), worker_cache.clone())?;
+            verified_set.insert(cert.digest());
         }
-        processing_tasks.spawn(rx_done);
+        verified_set.extend(cert.parents());
     }
     drop(verify_scope);
 
     // Wait for Core to finish processing the certificates.
     let _process_scope = monitored_scope("ProcessingFetchedCertificates");
-    while let Some(result) = processing_tasks.join_next().await {
-        if let Err(e) = result {
-            return Err(DagError::ClosedChannel(format!(
-                "Failed to wait for core to process loopback certificates: {}",
-                e
-            )));
-        }
+    let (tx_done, rx_done) = oneshot::channel();
+    if let Err(e) = tx_certificates_loopback
+        .send(CertificateLoopbackMessage {
+            certificates: all_certificates,
+            done: tx_done,
+        })
+        .await
+    {
+        return Err(DagError::ClosedChannel(format!(
+            "Failed to send fetched certificate to processing. tx_certificates_loopback error: {}",
+            e
+        )));
+    }
+    if let Err(e) = rx_done.await {
+        return Err(DagError::ClosedChannel(format!(
+            "Failed to wait for core to process loopback certificates: {}",
+            e
+        )));
     }
     trace!("Fetched certificates have been processed");
 
