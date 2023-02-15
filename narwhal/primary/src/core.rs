@@ -627,6 +627,7 @@ impl Core {
         // Append the certificate to the aggregator of the
         // corresponding round.
         let digest = certificate.digest();
+        let a_aggregate_cert = monitored_scope("ArunAggregateCert");
         if let Err(e) = self
             .append_certificate_in_aggregator(certificate.clone())
             .await
@@ -635,17 +636,22 @@ impl Core {
                 "Failed to aggregate certificate {} for header: {}",
                 digest, e
             );
+            drop(a_aggregate_cert);
             return Err(DagError::ShuttingDown);
         }
+        drop(a_aggregate_cert);
 
+        let a_send_to_consensus = monitored_scope("ArunSendToConsensus");
         // Send it to the consensus layer.
         if let Err(e) = self.tx_new_certificates.send(certificate).await {
             warn!(
                 "Failed to deliver certificate {} to the consensus: {}",
                 digest, e
             );
+            drop(a_send_to_consensus);
             return Err(DagError::ShuttingDown);
         }
+        drop(a_send_to_consensus);
 
         Ok(())
     }
