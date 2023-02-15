@@ -2621,7 +2621,7 @@ dependencies = [
 [[package]]
 name = "fastcrypto"
 version = "0.1.4"
-source = "git+https://github.com/MystenLabs/fastcrypto?rev=9a41ba511899c0d7efd9e047af2e968cdc54f77d#9a41ba511899c0d7efd9e047af2e968cdc54f77d"
+source = "git+https://github.com/MystenLabs/fastcrypto?rev=cd0ed6a97ac4224e0f4d76b9edfb796660fb779c#cd0ed6a97ac4224e0f4d76b9edfb796660fb779c"
 dependencies = [
  "aes",
  "aes-gcm",
@@ -2669,7 +2669,7 @@ dependencies = [
 [[package]]
 name = "fastcrypto-derive"
 version = "0.1.2"
-source = "git+https://github.com/MystenLabs/fastcrypto?rev=9a41ba511899c0d7efd9e047af2e968cdc54f77d#9a41ba511899c0d7efd9e047af2e968cdc54f77d"
+source = "git+https://github.com/MystenLabs/fastcrypto?rev=cd0ed6a97ac4224e0f4d76b9edfb796660fb779c#cd0ed6a97ac4224e0f4d76b9edfb796660fb779c"
 dependencies = [
  "convert_case 0.6.0",
  "proc-macro2 1.0.51",
@@ -2680,7 +2680,7 @@ dependencies = [
 [[package]]
 name = "fastcrypto-tbls"
 version = "0.1.0"
-source = "git+https://github.com/MystenLabs/fastcrypto?rev=9a41ba511899c0d7efd9e047af2e968cdc54f77d#9a41ba511899c0d7efd9e047af2e968cdc54f77d"
+source = "git+https://github.com/MystenLabs/fastcrypto?rev=cd0ed6a97ac4224e0f4d76b9edfb796660fb779c#cd0ed6a97ac4224e0f4d76b9edfb796660fb779c"
 dependencies = [
  "bincode",
  "digest 0.10.6",
@@ -2696,7 +2696,7 @@ dependencies = [
 [[package]]
 name = "fastcrypto-zkp"
 version = "0.1.0"
-source = "git+https://github.com/MystenLabs/fastcrypto?rev=9a41ba511899c0d7efd9e047af2e968cdc54f77d#9a41ba511899c0d7efd9e047af2e968cdc54f77d"
+source = "git+https://github.com/MystenLabs/fastcrypto?rev=cd0ed6a97ac4224e0f4d76b9edfb796660fb779c#cd0ed6a97ac4224e0f4d76b9edfb796660fb779c"
 dependencies = [
  "ark-bls12-381",
  "ark-ec",
@@ -7705,9 +7705,9 @@ dependencies = [
 
 [[package]]
 name = "serde_bytes"
-version = "0.11.8"
+version = "0.11.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "718dc5fff5b36f99093fc49b280cfc96ce6fc824317783bff5a1fed0c7a64819"
+checksum = "416bda436f9aab92e02c8e10d49a15ddd339cea90b6e340fe51ed97abb548294"
 dependencies = [
  "serde 1.0.152",
 ]
