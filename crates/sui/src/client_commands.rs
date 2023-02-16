@@ -1187,7 +1187,7 @@ impl Display for SuiClientCommandResult {
         let mut writer = String::new();
         match self {
             SuiClientCommandResult::Publish(response) => {
-                write!(writer, "{}", write_transaction_response(&response)?)?;
+                write!(writer, "{}", write_transaction_response(response)?)?;
             }
             SuiClientCommandResult::Object(object_read) => {
                 let object = unwrap_err_to_string(|| Ok(object_read.object()?));
@@ -1321,10 +1321,10 @@ impl Display for SuiClientCommandResult {
                 }
             }
             SuiClientCommandResult::SplitCoin(response) => {
-                write!(writer, "{}", write_transaction_response(&response)?)?;
+                write!(writer, "{}", write_transaction_response(response)?)?;
             }
             SuiClientCommandResult::MergeCoin(response) => {
-                write!(writer, "{}", write_transaction_response(&response)?)?;
+                write!(writer, "{}", write_transaction_response(response)?)?;
             }
             SuiClientCommandResult::Switch(response) => {
                 write!(writer, "{}", response)?;
@@ -1342,7 +1342,7 @@ impl Display for SuiClientCommandResult {
                 writeln!(writer, "{}", object)?;
             }
             SuiClientCommandResult::ExecuteSignedTx(response) => {
-                write!(writer, "{}", write_transaction_response(&response)?)?;
+                write!(writer, "{}", write_transaction_response(response)?)?;
             }
             SuiClientCommandResult::SerializeTransferSui(data_to_sign, data_to_execute) => {
                 writeln!(writer, "Intent message to sign: {}", data_to_sign)?;
