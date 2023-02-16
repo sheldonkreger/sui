@@ -81,23 +81,16 @@ procedure {:inline 1} $2_dynamic_field_has_child_object(parent: int, id: int) re
 
 {%- for instance in dynamic_field_instances %}
 
-{%- set S = "'" ~ instance.suffix ~ "'" -%}
-{%- set T = instance.name -%}
+{%- set K = instance.0.name -%}
+{%- set V = instance.1.name -%}
+{%- set S = "'" ~ instance.0.suffix ~ "_" ~ instance.1.suffix ~ "'" -%}
 
 // ----------------------------------------------------------------------------------
-// Native dynamic field implementation for object type `{{instance.suffix}}`
+// Native dynamic field implementation for object type `{{S}}`
 
-procedure {:inline 1} $2_dynamic_field_hash_type_and_key{{S}}(parent: int, k: {{T}}) returns (res: int);
-
-procedure {:inline 1} $2_dynamic_field_add_child_object{{S}}(parent: int, child: {{T}});
-
-procedure {:inline 1} $2_dynamic_field_borrow_child_object{{S}}(object: $2_object_UID, id: int) returns (res: {{T}});
-
-procedure {:inline 1} $2_dynamic_field_borrow_child_object_mut{{S}}(object: $Mutation $2_object_UID, id: int) returns (res: $Mutation ({{T}}), m: $Mutation ($2_object_UID));
-
-procedure {:inline 1} $2_dynamic_field_remove_child_object{{S}}(parent: int, id: int) returns (res: {{T}});
-
-procedure {:inline 1} $2_dynamic_field_has_child_object_with_ty{{S}}(parent: int, id: int) returns (res: bool);
+procedure {:inline 1} $2_dynamic_field_borrow_mut{{S}}(p: $Mutation ($2_object_UID), k: {{K}})
+returns (dst: $Mutation ({{V}}), p': $Mutation ($2_object_UID));
+// TODO(mengxu): need to complete this
 
 {%- endfor %}
 
@@ -105,7 +98,7 @@ procedure {:inline 1} $2_dynamic_field_has_child_object_with_ty{{S}}(parent: int
 // Native prover
 
 
-{%- for instance in prover_instances %}
+{%- for instance in prover_vec_instances %}
 
 {%- set S = "'" ~ instance.suffix ~ "'" -%}
 {%- set T = instance.name -%}
