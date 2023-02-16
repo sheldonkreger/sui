@@ -1,7 +1,11 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-import { getTransactionDigest, Coin as CoinAPI } from '@mysten/sui.js';
+import {
+    getTransactionDigest,
+    SUI_TYPE_ARG,
+    Coin as CoinAPI,
+} from '@mysten/sui.js';
 import {
     createAsyncThunk,
     createEntityAdapter,
@@ -27,6 +31,7 @@ type SendTokensTXArgs = {
     amount: bigint;
     recipientAddress: SuiAddress;
     gasBudget: number;
+    sendMax: boolean;
 };
 type TransactionResult = SuiExecuteTransactionResponse;
 
@@ -37,7 +42,7 @@ export const sendTokens = createAsyncThunk<
 >(
     'sui-objects/send-tokens',
     async (
-        { tokenTypeArg, amount, recipientAddress, gasBudget },
+        { tokenTypeArg, amount, recipientAddress, gasBudget, sendMax },
         { getState, extra: { api, background }, dispatch }
     ) => {
         const state = getState();
@@ -47,15 +52,27 @@ export const sendTokens = createAsyncThunk<
         }
         const coins: SuiMoveObject[] = accountCoinsSelector(state);
         const signer = api.getSignerInstance(activeAddress, background);
-        const response = await signer.signAndExecuteTransaction(
-            await CoinAPI.newPayTransaction(
-                coins,
-                tokenTypeArg,
-                amount,
-                recipientAddress,
-                gasBudget
-            )
-        );
+        let response;
+        // Use payAllSui if sendMax is true and the token type is SUI
+        if (sendMax && tokenTypeArg === SUI_TYPE_ARG) {
+            response = await signer.payAllSui({
+                recipient: recipientAddress,
+                gasBudget: gasBudget,
+                inputCoins: coins.map((coin) =>
+                    CoinAPI.getID(coin as SuiMoveObject)
+                ),
+            });
+        } else {
+            response = await signer.signAndExecuteTransaction(
+                await CoinAPI.newPayTransaction(
+                    coins,
+                    tokenTypeArg,
+                    amount,
+                    recipientAddress,
+                    gasBudget
+                )
+            );
+        }
         // TODO: better way to sync latest objects
         dispatch(fetchAllOwnedAndRequiredObjects());
         return response;
