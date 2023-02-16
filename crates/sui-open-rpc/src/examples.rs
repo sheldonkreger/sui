@@ -481,6 +481,7 @@ impl RpcExampleProvider {
                 dependencies: vec![],
             },
             timestamp_ms: None,
+            checkpoint: None,
             parsed_data: None,
         };
 

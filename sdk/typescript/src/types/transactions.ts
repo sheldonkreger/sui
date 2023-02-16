@@ -364,6 +364,7 @@ export const SuiTransactionResponse = object({
   certificate: CertifiedTransaction,
   effects: TransactionEffects,
   timestamp_ms: union([number(), literal(null)]),
+  checkpoint: optional(number()),
   parsed_data: union([SuiParsedTransactionResponse, literal(null)]),
 });
 export type SuiTransactionResponse = Infer<typeof SuiTransactionResponse>;
