@@ -58,9 +58,7 @@ export const sendTokens = createAsyncThunk<
             response = await signer.payAllSui({
                 recipient: recipientAddress,
                 gasBudget: gasBudget,
-                inputCoins: coins.map((coin) =>
-                    CoinAPI.getID(coin as SuiMoveObject)
-                ),
+                inputCoins: coins.map((coin) => CoinAPI.getID(coin)),
             });
         } else {
             response = await signer.signAndExecuteTransaction(

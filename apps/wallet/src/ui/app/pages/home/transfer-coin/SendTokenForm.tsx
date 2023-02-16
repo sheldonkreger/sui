@@ -44,7 +44,6 @@ export function SendTokenForm({
         isValid,
         isSubmitting,
         submitForm,
-        errors,
     } = useFormikContext<FormValues>();
 
     const [coinDecimals, { isLoading: isCoinDecimalsLoading }] =
