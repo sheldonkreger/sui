@@ -154,11 +154,12 @@ impl RpcReadApiServer for ReadApi {
             .get_transaction(digest)
             .await
             .tap_err(|err| debug!(tx_digest=?digest, "Failed to get transaction: {:?}", err))?;
+
         Ok(SuiTransactionResponse {
-            certificate: cert.try_into()?,
+            signed_transaction: cert.data().clone().try_into()?,
             effects: SuiTransactionEffects::try_from(effects, self.state.module_cache.as_ref())?,
             timestamp_ms: self.state.get_timestamp_ms(&digest).await?,
-            parsed_data: None,
+            confirmed_local_execution: None,
         })
     }
 

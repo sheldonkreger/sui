@@ -236,7 +236,7 @@ impl CheckpointBlockProvider {
                 .await?;
             transactions.push(Transaction {
                 transaction_identifier: TransactionIdentifier {
-                    hash: tx.certificate.transaction_digest,
+                    hash: tx.effects.transaction_digest,
                 },
                 operations: Operations::try_from(tx)?,
                 related_transactions: vec![],

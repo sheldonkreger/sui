@@ -5,7 +5,6 @@ use std::collections::BTreeMap;
 use std::ops::Range;
 use std::str::FromStr;
 
-use fastcrypto::traits::AggregateAuthenticator;
 use fastcrypto::traits::EncodeDecodeBase64;
 use fastcrypto::traits::KeyPair;
 use move_core_types::identifier::Identifier;
@@ -17,21 +16,19 @@ use sui::client_commands::EXAMPLE_NFT_NAME;
 use sui::client_commands::EXAMPLE_NFT_URL;
 use sui_json::SuiJsonValue;
 use sui_json_rpc_types::{
-    EventPage, MoveCallParams, OwnedObjectRef, RPCTransactionRequestParams,
-    SuiCertifiedTransaction, SuiData, SuiEvent, SuiEventEnvelope, SuiExecutionStatus,
-    SuiGasCostSummary, SuiObject, SuiObjectInfo, SuiObjectRead, SuiObjectRef, SuiParsedData,
-    SuiPastObjectRead, SuiRawData, SuiRawMoveObject, SuiTransactionAuthSignersResponse,
-    SuiTransactionData, SuiTransactionEffects, SuiTransactionResponse, TransactionBytes,
-    TransactionsPage, TransferObjectParams,
+    EventPage, MoveCallParams, OwnedObjectRef, RPCTransactionRequestParams, SuiData, SuiEvent,
+    SuiEventEnvelope, SuiExecutionStatus, SuiGasCostSummary, SuiObject, SuiObjectInfo,
+    SuiObjectRead, SuiObjectRef, SuiParsedData, SuiPastObjectRead, SuiRawData, SuiRawMoveObject,
+    SuiSignedTransaction, SuiTransactionAuthSignersResponse, SuiTransactionData,
+    SuiTransactionEffects, SuiTransactionResponse, TransactionBytes, TransactionsPage,
+    TransferObjectParams,
 };
 use sui_open_rpc::ExamplePairing;
 use sui_types::base_types::{
     ObjectDigest, ObjectID, ObjectType, SequenceNumber, SuiAddress, TransactionDigest,
 };
-use sui_types::crypto::AuthorityQuorumSignInfo;
 use sui_types::crypto::{
-    get_key_pair_from_rng, AccountKeyPair, AggregateAuthoritySignature, AuthorityKeyPair,
-    AuthorityPublicKeyBytes, AuthoritySignature, SuiAuthorityStrongQuorumSignInfo,
+    get_key_pair_from_rng, AccountKeyPair, AuthorityKeyPair, AuthorityPublicKeyBytes,
 };
 use sui_types::event::EventID;
 use sui_types::gas_coin::GasCoin;
@@ -318,10 +315,7 @@ impl RpcExampleProvider {
             "sui_getTransaction",
             vec![ExamplePairing::new(
                 "Return the transaction response object for specified transaction digest",
-                vec![(
-                    "digest",
-                    json!(result.certificate.transaction_digest.clone()),
-                )],
+                vec![("digest", json!(result.effects.transaction_digest))],
                 json!(result),
             )],
         )
@@ -346,7 +340,7 @@ impl RpcExampleProvider {
                 "Return the list of authorities that committed to the authority signature of the specified transaction digest",
                 vec![(
                     "digest",
-                    json!(tx_result.certificate.transaction_digest.clone()),
+                    json!(tx_result.effects.transaction_digest),
                 )],
                 json!(result),
             )],
@@ -434,21 +428,6 @@ impl RpcExampleProvider {
             event: sui_event.clone(),
         }];
         let result = SuiTransactionResponse {
-            certificate: SuiCertifiedTransaction {
-                transaction_digest: *tx_digest,
-                data: SuiTransactionData::try_from(data1).unwrap(),
-                tx_signature: signature.clone(),
-                auth_sign_info: SuiAuthorityStrongQuorumSignInfo::from(&AuthorityQuorumSignInfo {
-                    epoch: 0,
-                    // We create a dummy signature since there is no such thing as a default valid
-                    // signature.
-                    signature: AggregateAuthoritySignature::aggregate(&vec![
-                        AuthoritySignature::default(),
-                    ])
-                    .unwrap(),
-                    signers_map: Default::default(),
-                }),
-            },
             effects: SuiTransactionEffects {
                 status: SuiExecutionStatus::Success,
                 executed_epoch: 0,
@@ -481,7 +460,11 @@ impl RpcExampleProvider {
                 dependencies: vec![],
             },
             timestamp_ms: None,
-            parsed_data: None,
+            signed_transaction: SuiSignedTransaction {
+                data: SuiTransactionData::try_from(data1).unwrap(),
+                tx_signature: signature.clone(),
+            },
+            confirmed_local_execution: None,
         };
 
         (data2, signature, recipient, obj_id, result, events)
@@ -502,15 +485,13 @@ impl RpcExampleProvider {
                 vec![
                     (
                         "query",
-                        json!(EventQuery::Transaction(
-                            result.certificate.transaction_digest
-                        )),
+                        json!(EventQuery::Transaction(result.effects.transaction_digest)),
                     ),
                     (
                         "cursor",
                         json!(EventID {
                             event_seq: 10,
-                            tx_digest: result.certificate.transaction_digest
+                            tx_digest: result.effects.transaction_digest
                         }),
                     ),
                     ("limit", json!(events.len())),
