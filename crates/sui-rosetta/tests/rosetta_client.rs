@@ -1,7 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-use fastcrypto::encoding::Hex;
+use fastcrypto::encoding::{Encoding, Hex};
 use rand::rngs::OsRng;
 use rand::seq::IteratorRandom;
 use reqwest::Client;
@@ -141,7 +141,7 @@ impl RosettaClient {
         println!("Payload : {payloads:?}");
         // Combine
         let signing_payload = payloads.payloads.first().unwrap();
-        let bytes = signing_payload.hex_bytes.to_vec().unwrap();
+        let bytes = Hex::decode(&signing_payload.hex_bytes).unwrap();
         let signer = signing_payload.account_identifier.address;
         let signature = AccountKeystore::sign(keystore, &signer, &bytes).unwrap();
         let public_key = AccountKeystore::get_key(keystore, &signer)

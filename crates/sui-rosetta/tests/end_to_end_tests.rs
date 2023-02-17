@@ -1,20 +1,22 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-use serde_json::json;
+mod rosetta_client;
 
-use rosetta_client::{start_rosetta_test_server, RosettaEndpoint};
+use crate::rosetta_client::RosettaEndpoint;
+use rosetta_client::{get_random_sui, start_rosetta_test_server};
+use serde_json::json;
 use sui_keys::keystore::AccountKeystore;
+use sui_rosetta::operations::Operations;
 use sui_rosetta::types::{
     AccountBalanceRequest, AccountBalanceResponse, AccountIdentifier, NetworkIdentifier,
     SubAccount, SubAccountType, SuiEnv,
 };
 use sui_sdk::json::SuiJsonValue;
+use sui_sdk::rpc_types::SuiExecutionStatus;
 use sui_types::utils::to_sender_signed_transaction;
 use sui_types::{parse_sui_type_tag, SUI_FRAMEWORK_OBJECT_ID};
 use test_utils::network::TestClusterBuilder;
-
-mod rosetta_client;
 
 #[tokio::test]
 async fn test_locked_sui() {
@@ -205,4 +207,44 @@ async fn test_get_delegated_sui() {
     assert_eq!(100000, response.balances[0].value);
 
     // TODO: add DelegatedSui test when we can advance epoch.
+}
+
+#[tokio::test]
+async fn test_delegation() {
+    let test_cluster = TestClusterBuilder::new().build().await.unwrap();
+    let sender = test_cluster.accounts[0];
+    let client = test_cluster.wallet.get_client().await.unwrap();
+    let keystore = &test_cluster.wallet.config.keystore;
+    let coin1 = get_random_sui(&client, sender, vec![]).await;
+
+    let (rosetta_client, _handle) =
+        start_rosetta_test_server(client.clone(), test_cluster.swarm.dir()).await;
+
+    let validator = client
+        .governance_api()
+        .get_validators()
+        .await
+        .unwrap()
+        .first()
+        .unwrap()
+        .sui_address;
+    let ops = client
+        .transaction_builder()
+        .request_add_delegation(sender, vec![coin1.0], Some(100000), validator, None, 10000)
+        .await
+        .unwrap();
+
+    let ops = Operations::try_from(ops).unwrap();
+
+    let response = rosetta_client.rosetta_flow(ops, keystore).await;
+
+    let tx = client
+        .read_api()
+        .get_transaction(response.transaction_identifier.hash)
+        .await
+        .unwrap();
+
+    println!("Sui TX: {tx:?}");
+
+    assert_eq!(SuiExecutionStatus::Success, tx.effects.status)
 }

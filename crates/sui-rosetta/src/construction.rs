@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use axum::{Extension, Json};
-use fastcrypto::encoding::Hex;
+use fastcrypto::encoding::{Encoding, Hex};
 use sui_types::base_types::SuiAddress;
 use sui_types::crypto::{SignatureScheme, ToFromBytes};
 use sui_types::messages::{ExecuteTransactionRequestType, Transaction, TransactionData};
@@ -64,7 +64,7 @@ pub async fn payloads(
         unsigned_transaction: Hex::from_bytes(&intent_msg_bytes),
         payloads: vec![SigningPayload {
             account_identifier: address.into(),
-            hex_bytes: Hex::from_bytes(&bcs::to_bytes(&intent_msg)?),
+            hex_bytes: Hex::encode(&bcs::to_bytes(&intent_msg)?),
             signature_type: Some(SignatureType::Ed25519),
         }],
     })

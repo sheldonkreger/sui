@@ -474,7 +474,8 @@ impl IntoResponse for ConstructionPayloadsResponse {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SigningPayload {
     pub account_identifier: AccountIdentifier,
-    pub hex_bytes: Hex,
+    // Rosetta need the hex string without `0x`, cannot use fastcrypto's Hex
+    pub hex_bytes: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub signature_type: Option<SignatureType>,
 }
