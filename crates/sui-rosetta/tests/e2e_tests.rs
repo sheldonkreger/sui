@@ -1,12 +1,12 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::rosetta_client::{get_random_sui, start_rosetta_test_server};
+mod rosetta_client;
+
+use rosetta_client::{get_random_sui, start_rosetta_test_server};
 use sui_rosetta::operations::Operations;
 use sui_sdk::rpc_types::SuiExecutionStatus;
 use test_utils::network::TestClusterBuilder;
-
-mod rosetta_client;
 
 #[tokio::test]
 async fn test_delegation() {

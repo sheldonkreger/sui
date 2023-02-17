@@ -3,7 +3,7 @@
 
 use serde_json::json;
 
-use crate::rosetta_client::{start_rosetta_test_server, RosettaEndpoint};
+use rosetta_client::{start_rosetta_test_server, RosettaEndpoint};
 use sui_keys::keystore::AccountKeystore;
 use sui_rosetta::types::{
     AccountBalanceRequest, AccountBalanceResponse, AccountIdentifier, NetworkIdentifier,
@@ -15,6 +15,7 @@ use sui_types::{parse_sui_type_tag, SUI_FRAMEWORK_OBJECT_ID};
 use test_utils::network::TestClusterBuilder;
 
 mod rosetta_client;
+
 #[tokio::test]
 async fn test_locked_sui() {
     let test_cluster = TestClusterBuilder::new().build().await.unwrap();
