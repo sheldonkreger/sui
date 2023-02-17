@@ -89,10 +89,14 @@ export class ContentScriptConnection extends Connection {
                     this.permissionReply(permission, msg.id);
                 }
             } else if (isExecuteTransactionRequest(payload)) {
-                const allowed = await Permissions.hasPermissions(this.origin, [
-                    'viewAccount',
-                    'suggestTransactions',
-                ]);
+                const allowed = await Permissions.hasPermissions(
+                    this.origin,
+                    ['viewAccount', 'suggestTransactions'],
+                    undefined,
+                    (payload.transaction.type === 'v2' &&
+                        payload.transaction.options?.accountAddress) ||
+                        undefined
+                );
                 if (allowed) {
                     const result = await Transactions.executeTransaction(
                         payload.transaction,

@@ -92,7 +92,8 @@ export class BackgroundClient {
         txID: string,
         approved: boolean,
         txResult: SuiTransactionResponse | undefined,
-        tsResultError: string | undefined
+        tsResultError: string | undefined,
+        permitted: boolean
     ) {
         this.sendMessage(
             createMessage<TransactionRequestResponse>({
@@ -101,6 +102,7 @@ export class BackgroundClient {
                 txID,
                 txResult,
                 tsResultError,
+                permitted,
             })
         );
     }

@@ -12,6 +12,7 @@ export interface TransactionRequestResponse extends BasePayload {
     approved: boolean;
     txResult?: SuiTransactionResponse;
     tsResultError?: string;
+    permitted: boolean;
 }
 
 export function isTransactionRequestResponse(

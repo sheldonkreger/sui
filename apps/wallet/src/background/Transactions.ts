@@ -47,7 +47,7 @@ class Transactions {
             race(popUpClose, txResponseMessage).pipe(
                 take(1),
                 map(async (response) => {
-                    if (response) {
+                    if (response && response.permitted) {
                         const { approved, txResult, tsResultError } = response;
                         if (approved) {
                             txRequest.approved = approved;
@@ -66,6 +66,11 @@ class Transactions {
                         }
                     }
                     await this.removeTransactionRequest(txRequest.id);
+                    if (response && !response.permitted) {
+                        throw new Error(
+                            "Operation not allowed, dapp doesn't have the required permissions"
+                        );
+                    }
                     throw new Error('Transaction rejected from user');
                 })
             )
