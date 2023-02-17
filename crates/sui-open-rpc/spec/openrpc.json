@@ -5176,21 +5176,6 @@
           }
         ]
       },
-      "SignedTransaction": {
-        "type": "object",
-        "required": [
-          "data",
-          "txSignature"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/TransactionData"
-          },
-          "txSignature": {
-            "$ref": "#/components/schemas/GenericSignature"
-          }
-        }
-      },
       "StakeSubsidy": {
         "type": "object",
         "required": [
@@ -5913,7 +5898,7 @@
             "$ref": "#/components/schemas/TransactionEffects"
           },
           "signedTransaction": {
-            "$ref": "#/components/schemas/SignedTransaction"
+            "$ref": "#/components/schemas/Transaction"
           },
           "timestampMs": {
             "type": [
@@ -5985,6 +5970,21 @@
         "properties": {
           "contents": {
             "$ref": "#/components/schemas/Table"
+          }
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "required": [
+          "data",
+          "txSignature"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/TransactionData"
+          },
+          "txSignature": {
+            "$ref": "#/components/schemas/GenericSignature"
           }
         }
       },
