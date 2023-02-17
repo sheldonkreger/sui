@@ -348,7 +348,7 @@ pub enum MoveFunctionArgType {
 #[derive(Serialize, Deserialize, Debug, JsonSchema, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SuiTransactionResponse {
-    pub signed_transaction: SuiSignedTransaction,
+    pub signed_transaction: SuiTransaction,
     pub effects: SuiTransactionEffects,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub timestamp_ms: Option<u64>,
@@ -1555,13 +1555,13 @@ impl TryFrom<TransactionData> for SuiTransactionData {
 }
 
 #[derive(Debug, Deserialize, Serialize, JsonSchema, Clone)]
-#[serde(rename = "SignedTransaction", rename_all = "camelCase")]
-pub struct SuiSignedTransaction {
+#[serde(rename = "Transaction", rename_all = "camelCase")]
+pub struct SuiTransaction {
     pub data: SuiTransactionData,
     pub tx_signature: GenericSignature,
 }
 
-impl TryFrom<SenderSignedData> for SuiSignedTransaction {
+impl TryFrom<SenderSignedData> for SuiTransaction {
     type Error = anyhow::Error;
 
     fn try_from(data: SenderSignedData) -> Result<Self, Self::Error> {
@@ -1572,7 +1572,7 @@ impl TryFrom<SenderSignedData> for SuiSignedTransaction {
     }
 }
 
-impl Display for SuiSignedTransaction {
+impl Display for SuiTransaction {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut writer = String::new();
         writeln!(writer, "Transaction Signature: {:?}", self.tx_signature)?;
