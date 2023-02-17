@@ -24,14 +24,12 @@ import type { FormValues } from './';
 export type TransferCoinFormProps = {
     coinType: string;
     gasCostEstimation: number | null;
-    onClearSubmitError: () => void;
     onAmountChanged: (amount: bigint) => void;
     balance: bigint | null;
 };
 
 //TODO: update the form input to use input with action component
 export function SendTokenForm({
-    submitError,
     coinType,
     onAmountChanged,
     gasCostEstimation,
@@ -117,8 +115,7 @@ export function SendTokenForm({
                             actionDisabled={
                                 isPayAllSui ||
                                 queryResult.isLoading ||
-                                !maxToken ||
-                                gasEstimationLoading
+                                !maxToken
                             }
                         />
                     </div>
