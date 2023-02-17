@@ -402,6 +402,7 @@ impl SuiNode {
                 )
                 .layer(CallbackLayer::new(MetricsMakeCallbackHandler::new(
                     Arc::new(inbound_network_metrics),
+                    config.p2p_config.excessive_message_size(),
                 )))
                 .service(routes);
 
@@ -413,6 +414,7 @@ impl SuiNode {
                 )
                 .layer(CallbackLayer::new(MetricsMakeCallbackHandler::new(
                     Arc::new(outbound_network_metrics),
+                    config.p2p_config.excessive_message_size(),
                 )))
                 .into_inner();
 
