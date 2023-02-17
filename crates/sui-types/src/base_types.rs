@@ -8,6 +8,7 @@ use crate::crypto::{
     SuiPublicKey,
 };
 pub use crate::digests::{ObjectDigest, TransactionDigest, TransactionEffectsDigest};
+use crate::epoch_data::EpochData;
 use crate::error::ExecutionError;
 use crate::error::ExecutionErrorKind;
 use crate::error::SuiError;
@@ -32,6 +33,7 @@ use std::cmp::max;
 use std::convert::{TryFrom, TryInto};
 use std::fmt;
 use std::str::FromStr;
+
 #[cfg(test)]
 #[path = "unit_tests/base_types_tests.rs"]
 mod base_types_tests;

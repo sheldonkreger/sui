@@ -4,8 +4,7 @@
 use std::fmt::Debug;
 use std::marker::PhantomData;
 
-use fastcrypto::encoding::{Base64, Encoding, Hex};
-use fastcrypto::traits::ToFromBytes;
+use fastcrypto::encoding::Hex;
 use move_core_types::account_address::AccountAddress;
 use serde;
 use serde::de::{Deserializer, Error};
