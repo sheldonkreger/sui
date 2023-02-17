@@ -8,7 +8,7 @@ import type {
 } from "@mysten/sui.js";
 
 /** The latest API version of the signAndExecuteTransaction API. */
-export type SuiSignAndExecuteTransactionVersion = "1.1.0";
+export type SuiSignAndExecuteTransactionVersion = "1.2.0";
 
 /**
  * A Wallet Standard feature for signing a transaction, and submitting it to the
@@ -41,4 +41,8 @@ export interface SuiSignAndExecuteTransactionOutput
 /** Options for signing and sending transactions. */
 export interface SuiSignAndExecuteTransactionOptions {
   requestType?: ExecuteTransactionRequestType;
+  /**
+   * The address of the account we want to use to sign/execute the transaction.
+   */
+  accountAddress?: string;
 }

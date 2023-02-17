@@ -54,7 +54,10 @@ export interface WalletKitCore {
   disconnect(): Promise<void>;
   signAndExecuteTransaction(
     transaction: SignableTransaction,
-    options?: { requestType?: ExecuteTransactionRequestType }
+    options?: {
+      requestType?: ExecuteTransactionRequestType;
+      accountAddress?: string;
+    }
   ): Promise<SuiTransactionResponse>;
 }
 
@@ -227,12 +230,17 @@ export function createWalletKitCore({
     },
 
     signAndExecuteTransaction(transaction, options) {
-      if (!internalState.currentWallet) {
+      if (!internalState.currentWallet || !internalState.currentAccount) {
         throw new Error(
           "No wallet is currently connected, cannot call `signAndExecuteTransaction`."
         );
       }
-
+      if (!options) {
+        options = {};
+      }
+      if (!options.accountAddress) {
+        options.accountAddress = internalState.currentAccount;
+      }
       return internalState.currentWallet.signAndExecuteTransaction(
         transaction,
         options
